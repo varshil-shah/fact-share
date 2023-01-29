@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./style.css";
 
 const initialFacts = [
@@ -45,15 +46,15 @@ const CATEGORIES = [
   { name: "news", color: "#8b5cf6" },
 ];
 
-function Header() {
+function Header({ onShowForm, showForm }) {
   return (
     <header className="header">
       <div className="logo">
         <img src="logo.png" alt="Today I Learned Logo" />
         <h1>Today I Learned</h1>
       </div>
-      <button className="btn btn-large" id="shareAFact">
-        Share a fact
+      <button className="btn btn-large" id="shareAFact" onClick={onShowForm}>
+        {showForm ? "Close" : "Share a fact"}
       </button>
     </header>
   );
@@ -154,10 +155,15 @@ function FactForm() {
 }
 
 function App() {
+  const [showForm, setShowForm] = useState(false);
+
   return (
     <>
-      <Header />
-      <FactForm />
+      <Header
+        onShowForm={() => setShowForm((value) => !value)}
+        showForm={showForm}
+      />
+      {showForm && <FactForm />}
       <main className="main">
         <CategoryFilter />
         <FactsList />
