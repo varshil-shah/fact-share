@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import supabase from "./supabase";
+
 import "./style.css";
 
 const initialFacts = [
@@ -213,7 +215,15 @@ function FactForm({ onAddNewFact, onShowForm }) {
 
 function App() {
   const [showForm, setShowForm] = useState(false);
-  const [facts, setFacts] = useState(initialFacts);
+  const [facts, setFacts] = useState([]);
+
+  useEffect(() => {
+    async function getFacts() {
+      let { data: facts } = await supabase.from("facts").select("*");
+      setFacts(facts);
+    }
+    getFacts();
+  }, []);
 
   const onAddNewFact = (newFact) => setFacts((facts) => [newFact, ...facts]);
   const onShowForm = (value) => setShowForm(value);
