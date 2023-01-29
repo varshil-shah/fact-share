@@ -128,7 +128,7 @@ function Fact({ fact }) {
         {fact.category}
       </span>
       <div className="vote-buttons">
-        <button>👍 {fact.votesInteresting}</button>
+        <button>👍 {fact.votestInteresting}</button>
         <button>🤯 {fact.votesMindblowing}</button>
         <button>⛔️ {fact.votesFalse}</button>
       </div>
@@ -213,14 +213,26 @@ function FactForm({ onAddNewFact, onShowForm }) {
   );
 }
 
+function Message({ message }) {
+  return <p className="message">{message ? message : "Loading..."}</p>;
+}
+
 function App() {
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [facts, setFacts] = useState([]);
 
   useEffect(() => {
     async function getFacts() {
-      let { data: facts } = await supabase.from("facts").select("*");
-      setFacts(facts);
+      setIsLoading(true);
+      let { data: facts, error } = await supabase
+        .from("facts")
+        .select("*")
+        .order("votestInteresting", { ascending: false })
+        .limit(20);
+      if (!error) setFacts(facts);
+      else alert("There was an error while fetching data!");
+      setIsLoading(false);
     }
     getFacts();
   }, []);
@@ -239,7 +251,7 @@ function App() {
       )}
       <main className="main">
         <CategoryFilter />
-        <FactsList facts={facts} />
+        {isLoading ? <Message /> : <FactsList facts={facts} />}
       </main>
     </>
   );
