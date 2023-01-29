@@ -88,10 +88,7 @@ function Category({ category }) {
   );
 }
 
-function FactsList() {
-  // Temporary
-  const facts = initialFacts;
-
+function FactsList({ facts }) {
   return (
     <section>
       <ul className="facts-list">
@@ -137,17 +134,77 @@ function Fact({ fact }) {
   );
 }
 
-function FactForm() {
+function isValidHttpUrl(string) {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
+function FactForm({ onAddNewFact, onShowForm }) {
+  const [text, setText] = useState("");
+  const [source, setSource] = useState("");
+  const [category, setCategory] = useState("");
+  const textLength = text.length;
+
+  function onSubmitHandler(e) {
+    e.preventDefault();
+    if (!text || !isValidHttpUrl(source) || !category) return;
+
+    const newFact = {
+      id: Math.round(Math.random() * 10000000),
+      text,
+      source,
+      category,
+      votesInteresting: 0,
+      votesMindblowing: 0,
+      votesFalse: 0,
+      createdIn: new Date().getFullYear(),
+    };
+
+    // reset all values
+    setText("");
+    setSource("");
+    setCategory("");
+
+    onAddNewFact(newFact);
+
+    // Hide form
+    onShowForm(false);
+  }
+
   return (
-    <form className="fact-form">
-      <input type="text" placeholder="Share a fact with the world..." />
-      <span>200</span>
-      <input type="text" placeholder="Trustworthy source..." />
-      <select>
+    <form className="fact-form" onSubmit={onSubmitHandler}>
+      <input
+        required
+        type="text"
+        placeholder="Share a fact with the world..."
+        value={text}
+        maxLength={200}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <span>{200 - textLength}</span>
+      <input
+        required
+        type="text"
+        placeholder="Trustworthy source..."
+        value={source}
+        onChange={(e) => setSource(e.target.value)}
+      />
+      <select
+        required
+        onChange={(e) => setCategory(e.target.value)}
+        value={category}
+      >
         <option value="">Choose category:</option>
-        <option value="technology">Technology</option>
-        <option value="science">Science</option>
-        <option value="finance">Finance</option>
+        {CATEGORIES.map((category) => (
+          <option key={category.name} value={category.name}>
+            {category.name.toUpperCase()}
+          </option>
+        ))}
       </select>
       <button className="btn btn-large">Post</button>
     </form>
@@ -156,6 +213,10 @@ function FactForm() {
 
 function App() {
   const [showForm, setShowForm] = useState(false);
+  const [facts, setFacts] = useState(initialFacts);
+
+  const onAddNewFact = (newFact) => setFacts((facts) => [newFact, ...facts]);
+  const onShowForm = (value) => setShowForm(value);
 
   return (
     <>
@@ -163,10 +224,12 @@ function App() {
         onShowForm={() => setShowForm((value) => !value)}
         showForm={showForm}
       />
-      {showForm && <FactForm />}
+      {showForm && (
+        <FactForm onAddNewFact={onAddNewFact} onShowForm={onShowForm} />
+      )}
       <main className="main">
         <CategoryFilter />
-        <FactsList />
+        <FactsList facts={facts} />
       </main>
     </>
   );
