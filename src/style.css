@@ -6,7 +6,7 @@
 
 *:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #e7e5e4;
+  box-shadow: 0 0 0 0.8px #a0a0a0;
 }
 
 body {
@@ -16,7 +16,7 @@ body {
   padding: 48px 64px;
 }
 
-.container {
+#root {
   max-width: 1500px;
   margin: 0 auto;
 }
@@ -79,10 +79,6 @@ h1 {
   display: flex;
   align-items: center;
   gap: 24px;
-}
-
-.fact:last-child {
-  margin-bottom: 0;
 }
 
 .vote-buttons {
