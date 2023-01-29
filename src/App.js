@@ -90,6 +90,10 @@ function FactsList({ facts }) {
 }
 
 function Fact({ fact }) {
+  const color = CATEGORIES.find(
+    (category) => category.name === fact.category
+  ).color;
+
   return (
     <li className="fact">
       <p>
@@ -106,9 +110,7 @@ function Fact({ fact }) {
       <span
         className="tag"
         style={{
-          backgroundColor: CATEGORIES.find(
-            (category) => category.name === fact.category
-          ).color,
+          backgroundColor: color,
         }}
       >
         {fact.category}
@@ -136,22 +138,27 @@ function FactForm({ onAddNewFact, onShowForm }) {
   const [text, setText] = useState("");
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const textLength = text.length;
 
-  function onSubmitHandler(e) {
+  async function onSubmitHandler(e) {
     e.preventDefault();
     if (!text || !isValidHttpUrl(source) || !category) return;
 
-    const newFact = {
-      id: Math.round(Math.random() * 10000000),
-      text,
-      source,
-      category,
-      votesInteresting: 0,
-      votesMindblowing: 0,
-      votesFalse: 0,
-      createdIn: new Date().getFullYear(),
-    };
+    setIsUploading(true);
+    const {
+      data: [newFact],
+      error,
+    } = await supabase
+      .from("facts")
+      .insert([{ text, source, category }])
+      .select();
+    setIsUploading(false);
+
+    if (error) {
+      console.log({ error: error.message });
+      alert("An error occured while inserting new fact!");
+    }
 
     // reset all values
     setText("");
@@ -173,6 +180,7 @@ function FactForm({ onAddNewFact, onShowForm }) {
         value={text}
         maxLength={200}
         onChange={(e) => setText(e.target.value)}
+        disabled={isUploading}
       />
       <span>{200 - textLength}</span>
       <input
@@ -181,11 +189,13 @@ function FactForm({ onAddNewFact, onShowForm }) {
         placeholder="Trustworthy source..."
         value={source}
         onChange={(e) => setSource(e.target.value)}
+        disabled={isUploading}
       />
       <select
         required
         onChange={(e) => setCategory(e.target.value)}
         value={category}
+        disabled={isUploading}
       >
         <option value="">Choose category:</option>
         {CATEGORIES.map((category) => (
@@ -194,7 +204,9 @@ function FactForm({ onAddNewFact, onShowForm }) {
           </option>
         ))}
       </select>
-      <button className="btn btn-large">Post</button>
+      <button className="btn btn-large" disabled={isUploading}>
+        {isUploading ? "Uploading..." : "Post"}
+      </button>
     </form>
   );
 }
