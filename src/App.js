@@ -115,9 +115,13 @@ function Fact({ fact, setFacts }) {
     (category) => category.name === fact.category
   ).color;
 
+  const isDisputed =
+    fact.votesFalse > fact.votesMindblowing + fact.votestInteresting;
+
   return (
     <li className="fact">
       <p>
+        {isDisputed && <span className="disputed">[⛔DISPUTED]</span>}
         {fact.text}
         <a
           className="source"
