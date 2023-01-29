@@ -66,7 +66,7 @@ function Category({ category, setCurrentCategory }) {
   );
 }
 
-function FactsList({ facts }) {
+function FactsList({ facts, setFacts }) {
   if (facts.length === 0) {
     return (
       <Message
@@ -81,7 +81,7 @@ function FactsList({ facts }) {
     <section>
       <ul className="facts-list">
         {facts.map((fact) => (
-          <Fact fact={fact} key={fact.id} />
+          <Fact fact={fact} key={fact.id} setFacts={setFacts} />
         ))}
       </ul>
       <p>There are {facts.length} facts in the database. Add your own!</p>
@@ -89,7 +89,28 @@ function FactsList({ facts }) {
   );
 }
 
-function Fact({ fact }) {
+function Fact({ fact, setFacts }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  async function handleVotes(columnName) {
+    setIsUpdating(true);
+    const {
+      data: [updatedFact],
+      error,
+    } = await supabase
+      .from("facts")
+      .update({ [columnName]: fact[columnName] + 1 })
+      .eq("id", fact.id)
+      .select();
+    setIsUpdating(false);
+
+    if (!error) {
+      setFacts((facts) =>
+        facts.map((f) => (f.id === fact.id ? updatedFact : f))
+      );
+    }
+  }
+
   const color = CATEGORIES.find(
     (category) => category.name === fact.category
   ).color;
@@ -116,9 +137,21 @@ function Fact({ fact }) {
         {fact.category}
       </span>
       <div className="vote-buttons">
-        <button>👍 {fact.votestInteresting}</button>
-        <button>🤯 {fact.votesMindblowing}</button>
-        <button>⛔️ {fact.votesFalse}</button>
+        <button
+          onClick={() => handleVotes("votestInteresting")}
+          disabled={isUpdating}
+        >
+          👍 {fact.votestInteresting}
+        </button>
+        <button
+          onClick={() => handleVotes("votesMindblowing")}
+          disabled={isUpdating}
+        >
+          🤯 {fact.votesMindblowing}
+        </button>
+        <button onClick={() => handleVotes("votesFalse")} disabled={isUpdating}>
+          ⛔️ {fact.votesFalse}
+        </button>
       </div>
     </li>
   );
@@ -165,7 +198,7 @@ function FactForm({ onAddNewFact, onShowForm }) {
     setSource("");
     setCategory("");
 
-    onAddNewFact(newFact);
+    if (!error) onAddNewFact(newFact);
 
     // Hide form
     onShowForm(false);
@@ -254,7 +287,11 @@ function App() {
       )}
       <main className="main">
         <CategoryFilter setCurrentCategory={setCurrentCategory} />
-        {isLoading ? <Message /> : <FactsList facts={facts} />}
+        {isLoading ? (
+          <Message />
+        ) : (
+          <FactsList facts={facts} setFacts={setFacts} />
+        )}
       </main>
     </>
   );
