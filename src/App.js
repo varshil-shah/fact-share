@@ -66,32 +66,24 @@ function CategoryFilter() {
         <li className="category">
           <button className="btn btn-all-categories">All</button>
         </li>
-        <li className="category">
-          <button
-            className="btn btn-category"
-            style={{ backgroundColor: "#3b82f6" }}
-          >
-            Technology
-          </button>
-        </li>
-        <li className="category">
-          <button
-            className="btn btn-category"
-            style={{ backgroundColor: "#16a34a" }}
-          >
-            Science
-          </button>
-        </li>
-        <li className="category">
-          <button
-            className="btn btn-category"
-            style={{ backgroundColor: "#ef4444" }}
-          >
-            Finance
-          </button>
-        </li>
+        {CATEGORIES.map((category) => (
+          <Category category={category} key={category.name} />
+        ))}
       </ul>
     </aside>
+  );
+}
+
+function Category({ category }) {
+  return (
+    <li className="category">
+      <button
+        className="btn btn-category"
+        style={{ backgroundColor: category.color }}
+      >
+        {category.name}
+      </button>
+    </li>
   );
 }
 
