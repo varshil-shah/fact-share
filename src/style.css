@@ -250,9 +250,13 @@ ul {
 }
 
 @media (max-width: 575px) {
-  /* body {
-    padding: 24px;
-  } */
+  body {
+    padding: 12px;
+  }
+
+  .main {
+    height: auto;
+  }
 
   .header {
     flex-direction: column;
